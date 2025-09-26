@@ -1,0 +1,29 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Lista de Productos</h2>
+    <a href="/profile" class="btn btn-secondary">Volver al Perfil</a>
+</div>
+
+<div class="row">
+    {{#if productos}}
+        {{#each productos}}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{nombre}}</h5>
+                    <p class="card-text"><strong>Precio:</strong> ${{precio}}</p>
+                    <p class="card-text"><strong>Descripción:</strong> {{descripcion}}</p>
+                    <p class="card-text"><strong>Categoría:</strong> {{categoria}}</p>
+                    <p class="card-text"><strong>Stock:</strong> {{stock}}</p>
+                    <small class="text-muted">Código: {{codigo}}</small>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    {{else}}
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                No hay productos disponibles en este momento.
+            </div>
+        </div>
+    {{/if}}
+</div>
