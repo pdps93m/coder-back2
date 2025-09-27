@@ -3,17 +3,15 @@ import productos from "../models/productos.model.js";
 
 const router = Router();
 
-// GET todos los productos
 router.get('/', async (req, res) => {
     try {
         const listaProductos = await productos.find()
         res.status(200).json(listaProductos)
     } catch (err) {
-        res.status(500).json({ error: "Fallo el acceso a la db de productos" })
+        res.status(500).json({ error: "no pude acceder a los productos" })
     }
 })
 
-// GET producto por ID
 router.get('/:id', async (req, res) => {
     try {
         const producto = await productos.findById(req.params.id)
@@ -26,7 +24,6 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-// POST crear nuevo producto
 router.post('/', async (req, res) => {
     const { nombre, descripcion, precio, categoria, stock, codigo } = req.body
 
@@ -54,7 +51,6 @@ router.post('/', async (req, res) => {
     }
 })
 
-// PUT actualizar producto
 router.put('/:id', async (req, res) => {
     const { nombre, descripcion, precio, categoria, stock, codigo } = req.body
 
@@ -79,7 +75,6 @@ router.put('/:id', async (req, res) => {
     }
 })
 
-// DELETE eliminar producto
 router.delete('/:id', async (req, res) => {
     try {
         const productoEliminado = await productos.findByIdAndDelete(req.params.id)

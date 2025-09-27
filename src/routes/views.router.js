@@ -33,7 +33,7 @@ router.get('/productos', checkAuth({ mustBeLoggedIn: true }), async (req, res) =
         })
     } catch (err) {
         console.log(err)
-        res.send("error")
+        res.send("error interno")
     }
 })
 

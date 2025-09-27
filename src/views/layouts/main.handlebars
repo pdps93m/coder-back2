@@ -12,7 +12,7 @@
             <a class="navbar-brand" href="/">Coder Backend</a>
             {{#if user}}
                 <div class="navbar-nav ms-auto">
-                    <span class="navbar-text me-3">Hola, {{user.first_name}}!</span>
+                    <span class="navbar-text me-3">Hola, {{user.nombre}}!</span>
                     <a class="nav-link" href="/productos">Productos</a>
                     <form method="POST" action="/api/sessions/logout" class="d-inline">
                         <button type="submit" class="btn btn-outline-light">Logout</button>
