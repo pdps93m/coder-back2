@@ -9,7 +9,6 @@ function addToCart(productId, productName, price, stock) {
         return;
     }
 
-    // Enviar al backend
     fetch('/api/cart/add', {
         method: 'POST',
         headers: {
@@ -76,7 +75,6 @@ function decreaseQuantity(productId) {
 }
 
 function updateCartCounter() {
-    // Intentar obtener del backend primero
     fetch('/api/cart/session')
         .then(response => response.json())
         .then(data => {
@@ -86,7 +84,6 @@ function updateCartCounter() {
                     counter.textContent = data.totalItems;
                 }
             } else {
-                // Fallback a localStorage
                 updateCartCounterFromLocalStorage();
             }
         })
@@ -105,10 +102,8 @@ function updateCartCounterFromLocalStorage() {
 }
 
 function showSuccessMessage(productName, quantity) {
-    // Crear notificación simple
     const message = `✅ ${productName} (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'}) agregado al carrito`;
     
-    // Crear elemento de notificación
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -126,7 +121,6 @@ function showSuccessMessage(productName, quantity) {
     
     document.body.appendChild(notification);
     
-    // Remover después de 3 segundos
     setTimeout(() => {
         if (notification.parentNode) {
             notification.parentNode.removeChild(notification);
@@ -134,13 +128,9 @@ function showSuccessMessage(productName, quantity) {
     }, 3000);
 }
 
-// ==========================================
-// INICIALIZACIÓN
-// ==========================================
 document.addEventListener('DOMContentLoaded', function() {
     updateCartCounter();
     
-    // Verificar que las funciones están disponibles globalmente
     window.addToCart = addToCart;
     window.increaseQuantity = increaseQuantity;
     window.decreaseQuantity = decreaseQuantity;

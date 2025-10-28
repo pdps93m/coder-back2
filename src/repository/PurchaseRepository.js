@@ -68,7 +68,6 @@ class PurchaseRepository {
                 const quantity = item.quantity;
                 const subtotal = product.precio * quantity;
 
-                // Preparar datos del producto para el ticket
                 processedProducts.push({
                     product: product._id,
                     title: product.nombre,
@@ -78,7 +77,6 @@ class PurchaseRepository {
                     status: 'available'
                 });
 
-                // Preparar actualización de stock
                 stockUpdates.push({
                     productId: product._id,
                     newStock: product.stock - quantity
@@ -135,7 +133,6 @@ class PurchaseRepository {
         }
     }
 
-    // Validar stock de productos en el carrito
     async validateCartStock(cart) {
         const availableProducts = [];
         const unavailableProducts = [];
@@ -184,7 +181,6 @@ class PurchaseRepository {
         };
     }
 
-    // Obtener tickets del usuario
     async getUserTickets(userId) {
         try {
             const tickets = await this.ticketDAO.getTicketsByUser(userId);
@@ -205,7 +201,6 @@ class PurchaseRepository {
         }
     }
 
-    // Obtener ticket por código
     async getTicketByCode(code, userId = null) {
         try {
             const ticket = await this.ticketDAO.getTicketByCode(code);
@@ -218,7 +213,6 @@ class PurchaseRepository {
                 };
             }
 
-            // Verificar permisos (usuario solo puede ver sus propios tickets)
             if (userId && ticket.purchaser_id.toString() !== userId.toString()) {
                 return {
                     success: false,
@@ -241,7 +235,6 @@ class PurchaseRepository {
         }
     }
 
-    // Obtener estadísticas de compras
     async getPurchaseStats(userId = null) {
         try {
             const stats = await this.ticketDAO.getTicketStats(userId);
@@ -265,7 +258,6 @@ class PurchaseRepository {
         }
     }
 
-    // Cancelar ticket (solo si está pendiente)
     async cancelTicket(ticketId, userId, reason = '') {
         try {
             const ticket = await this.ticketDAO.getById(ticketId);
@@ -294,7 +286,6 @@ class PurchaseRepository {
                 };
             }
 
-            // Restaurar stock
             for (const item of ticket.products) {
                 const product = await this.productDAO.getById(item.product);
                 if (product) {
@@ -304,7 +295,6 @@ class PurchaseRepository {
                 }
             }
 
-            // Actualizar ticket
             const cancelledTicket = await this.ticketDAO.updateTicketStatus(ticketId, 'cancelled', {
                 notes: ticket.notes ? `${ticket.notes}\nCancelado: ${reason}` : `Cancelado: ${reason}`
             });
@@ -324,7 +314,6 @@ class PurchaseRepository {
         }
     }
 
-    // Enviar email de confirmación de compra
     async sendPurchaseConfirmationEmail(user, ticket) {
         try {
             const emailContent = this.generatePurchaseEmailTemplate(user, ticket);
@@ -338,11 +327,9 @@ class PurchaseRepository {
 
         } catch (error) {
             console.error('Error al enviar email de confirmación:', error);
-            // No fallar la compra por error de email
         }
     }
 
-    // Template de email para confirmación de compra
     generatePurchaseEmailTemplate(user, ticket) {
         const isPartial = ticket.status === 'partially_completed';
         

@@ -2,11 +2,9 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import ProductDAO from '../dao/ProductDAO.js';
 
-// Conectar a MongoDB
 await mongoose.connect(process.env.MONGODB_URL, {});
 console.log('Conectado a MongoDB para agregar productos');
 
-// Productos a agregar
 const newProducts = [
     {
         nombre: "Smartphone Galaxy Pro",
@@ -50,7 +48,6 @@ async function addProducts() {
             const product = newProducts[i];
             
             try {
-                // Verificar si el producto ya existe por código
                 const existingProduct = await ProductDAO.findByCode(product.codigo);
                 
                 if (existingProduct) {
@@ -58,7 +55,6 @@ async function addProducts() {
                     continue;
                 }
 
-                // Crear el producto
                 const newProduct = await ProductDAO.create(product);
                 console.log(`Producto agregado: ${newProduct.nombre}`);
                 console.log(`   Precio: $${newProduct.precio}`);
@@ -77,11 +73,9 @@ async function addProducts() {
 
         console.log('\nProceso completado!');
         
-        // Mostrar resumen de productos en la base de datos
         const allProducts = await ProductDAO.getAll();
         console.log(`Total de productos en catálogo: ${allProducts.length}`);
         
-        // Mostrar productos por categoría
         const categories = {};
         allProducts.forEach(product => {
             categories[product.categoria] = (categories[product.categoria] || 0) + 1;
@@ -100,5 +94,4 @@ async function addProducts() {
     }
 }
 
-// Ejecutar script
 addProducts();

@@ -10,10 +10,8 @@ class PasswordRecoveryRepository {
         this.tokenDAO = passwordResetTokenDAO;
     }
 
-    // Lógica de negocio: Solicitar recuperación de contraseña
     async requestPasswordReset(email) {
         try {
-            // Validar email
             if (!email || !this.isValidEmail(email)) {
                 return {
                     success: false,
@@ -22,10 +20,8 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Buscar usuario por email
             const user = await this.userDAO.findByEmail(email);
             if (!user) {
-                // Por seguridad, no revelar si el email existe o no
                 return {
                     success: true,
                     message: 'Si el email existe, recibirás instrucciones para recuperar tu contraseña',
@@ -33,7 +29,6 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Verificar rate limiting (máximo 3 solicitudes por hora)
             const recentRequests = await this.checkRateLimit(user._id);
             if (recentRequests >= 3) {
                 return {
@@ -43,13 +38,10 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Generar token seguro
             const resetToken = this.generateSecureToken();
             
-            // Crear token en base de datos
             await this.tokenDAO.createResetToken(user._id, email, resetToken);
 
-            // Generar enlace de recuperación
             const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
             return {
@@ -57,7 +49,7 @@ class PasswordRecoveryRepository {
                 message: 'Si el email existe, recibirás instrucciones para recuperar tu contraseña',
                 statusCode: 200,
                 data: {
-                    resetToken, // Para testing, en producción no se retorna
+                    resetToken,
                     resetLink,
                     user: {
                         email: user.email,
@@ -76,7 +68,6 @@ class PasswordRecoveryRepository {
         }
     }
 
-    // Lógica de negocio: Validar token de recuperación
     async validateResetToken(token) {
         try {
             if (!token) {
@@ -87,7 +78,6 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Buscar token válido
             const resetTokenRecord = await this.tokenDAO.findValidToken(token);
             
             if (!resetTokenRecord) {
@@ -119,10 +109,8 @@ class PasswordRecoveryRepository {
         }
     }
 
-    // Lógica de negocio: Resetear contraseña con token
     async resetPassword(token, newPassword, confirmPassword) {
         try {
-            // Validaciones básicas
             if (!token || !newPassword || !confirmPassword) {
                 return {
                     success: false,
@@ -147,7 +135,6 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Validar token
             const tokenValidation = await this.validateResetToken(token);
             if (!tokenValidation.success) {
                 return tokenValidation;
@@ -155,13 +142,10 @@ class PasswordRecoveryRepository {
 
             const { tokenId, userId } = tokenValidation.data;
 
-            // Hash de la nueva contraseña
             const hashedPassword = bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10));
 
-            // Actualizar contraseña del usuario
             await this.userDAO.updatePassword(userId, hashedPassword);
 
-            // Marcar token como usado
             await this.tokenDAO.markTokenAsUsed(tokenId);
 
             return {
@@ -180,10 +164,8 @@ class PasswordRecoveryRepository {
         }
     }
 
-    // Lógica de negocio: Cambiar contraseña (usuario autenticado)
     async changePassword(userId, currentPassword, newPassword, confirmPassword) {
         try {
-            // Validaciones
             if (!currentPassword || !newPassword || !confirmPassword) {
                 return {
                     success: false,
@@ -208,7 +190,6 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Obtener usuario y verificar contraseña actual
             const user = await this.userDAO.getById(userId);
             if (!user) {
                 return {
@@ -227,7 +208,6 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Verificar que la nueva contraseña sea diferente
             const isSamePassword = bcrypt.compareSync(newPassword, user.password);
             if (isSamePassword) {
                 return {
@@ -237,7 +217,6 @@ class PasswordRecoveryRepository {
                 };
             }
 
-            // Hash y actualizar contraseña
             const hashedPassword = bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10));
             await this.userDAO.updatePassword(userId, hashedPassword);
 
@@ -257,7 +236,6 @@ class PasswordRecoveryRepository {
         }
     }
 
-    // Utilidades privadas
     generateSecureToken() {
         return crypto.randomBytes(32).toString('hex');
     }
@@ -273,7 +251,6 @@ class PasswordRecoveryRepository {
 
     async checkRateLimit(userId) {
         try {
-            // Contar solicitudes en la última hora
             const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
             const recentTokens = await this.tokenDAO.find({
                 userId,
@@ -286,7 +263,6 @@ class PasswordRecoveryRepository {
         }
     }
 
-    // Método para obtener estadísticas (admin)
     async getPasswordResetStats(userId) {
         try {
             const stats = await this.tokenDAO.getUserResetStats(userId);

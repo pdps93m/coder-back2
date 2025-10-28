@@ -10,7 +10,6 @@ class CartRepository {
         this.productDAO = productDAO;
     }
 
-    // Lógica de negocio: Obtener carrito del usuario
     async getUserCart(userId) {
         try {
             const user = await this.userDAO.getUserWithCart(userId);
@@ -23,7 +22,6 @@ class CartRepository {
                 };
             }
 
-            // Si no tiene carrito, crear uno vacío
             if (!user.cart) {
                 const newCart = await this.cartDAO.createEmptyCart();
                 await this.userDAO.update(user._id, { cart: newCart._id });
@@ -48,10 +46,8 @@ class CartRepository {
         }
     }
 
-    // Lógica de negocio: Agregar producto al carrito con validaciones completas
     async addProductToCart(userId, productId, quantity = 1) {
         try {
-            // Validaciones básicas
             if (!productId) {
                 return {
                     success: false,
@@ -68,7 +64,6 @@ class CartRepository {
                 };
             }
 
-            // Verificar que el producto existe y tiene stock
             const product = await this.productDAO.getById(productId);
             if (!product) {
                 return {
@@ -86,25 +81,21 @@ class CartRepository {
                 };
             }
 
-            // Obtener usuario y carrito
             const user = await this.userDAO.getById(userId);
             let cart;
 
             if (!user.cart) {
-                // Crear carrito nuevo si no existe
                 cart = await this.cartDAO.createEmptyCart();
                 await this.userDAO.update(user._id, { cart: cart._id });
             } else {
                 cart = await this.cartDAO.getById(user.cart);
             }
 
-            // Verificar si el producto ya está en el carrito
             const existingProductIndex = cart.products.findIndex(
                 item => item.product.toString() === productId
             );
 
             if (existingProductIndex >= 0) {
-                // Actualizar cantidad existente
                 const newQuantity = cart.products[existingProductIndex].quantity + quantity;
                 
                 if (newQuantity > product.stock) {
@@ -117,14 +108,11 @@ class CartRepository {
                 
                 cart.products[existingProductIndex].quantity = newQuantity;
             } else {
-                // Agregar nuevo producto
                 cart.products.push({ product: productId, quantity });
             }
 
-            // Guardar cambios
             await this.cartDAO.update(cart._id, { products: cart.products });
             
-            // Obtener carrito actualizado con productos poblados
             const updatedCart = await this.cartDAO.getCartWithProducts(cart._id);
 
             return {
@@ -142,7 +130,6 @@ class CartRepository {
         }
     }
 
-    // Lógica de negocio: Actualizar cantidad de producto en carrito
     async updateProductQuantity(userId, productId, quantity) {
         try {
             if (!productId || !quantity || quantity < 1) {
@@ -175,7 +162,6 @@ class CartRepository {
                 };
             }
 
-            // Verificar stock disponible
             const product = await this.productDAO.getById(productId);
             if (quantity > product.stock) {
                 return {
@@ -185,7 +171,6 @@ class CartRepository {
                 };
             }
 
-            // Actualizar cantidad
             cart.products[productIndex].quantity = quantity;
             await this.cartDAO.update(cart._id, { products: cart.products });
             
@@ -206,7 +191,6 @@ class CartRepository {
         }
     }
 
-    // Lógica de negocio: Remover producto del carrito
     async removeProductFromCart(userId, productId) {
         try {
             const user = await this.userDAO.getById(userId);
@@ -251,7 +235,6 @@ class CartRepository {
         }
     }
 
-    // Lógica de negocio: Vaciar carrito
     async clearCart(userId) {
         try {
             const user = await this.userDAO.getById(userId);
@@ -281,7 +264,6 @@ class CartRepository {
         }
     }
 
-    // Lógica de negocio: Calcular total del carrito
     async getCartTotal(userId) {
         try {
             const cartResult = await this.getUserCart(userId);
@@ -319,7 +301,6 @@ class CartRepository {
         }
     }
 
-    // Lógica de negocio: Validar carrito antes de compra
     async validateCartForPurchase(userId) {
         try {
             const cartResult = await this.getUserCart(userId);
@@ -341,7 +322,6 @@ class CartRepository {
             const validationResults = [];
             let hasErrors = false;
 
-            // Validar cada producto
             for (const item of cart.products) {
                 const product = await this.productDAO.getById(item.product._id || item.product);
                 

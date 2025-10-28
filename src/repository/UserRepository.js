@@ -33,8 +33,8 @@ class UserRepository {
 
             return {
                 success: true,
-                user: user, // Usuario completo para generar tokens
-                userDTO: new UserDTO(user), // DTO para respuestas seguras
+                user: user,
+                userDTO: new UserDTO(user),
                 message: 'Autenticación exitosa'
             };
         } catch (error) {

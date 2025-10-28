@@ -11,39 +11,35 @@ document.addEventListener('DOMContentLoaded', function() {
     loadCartData();
 });
 
-/**
- * Inicializa el checkout y configura el estado inicial
- */
+
 function initializeCheckout() {
     setupFormValidation();
     
-    // Configurar métodos de pago
+   
     setupPaymentMethods();
     
-    // Configurar formateo de inputs
+    
     setupInputFormatting();
     
-    // Cargar datos del usuario si están disponibles
+   
     loadUserData();
 }
 
-/**
- * Configura todos los event listeners
- */
+
 function setupEventListeners() {
-    // Event listener para el formulario principal
+   
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', handleFormSubmit);
     }
     
-    // Event listeners para métodos de pago
+    
     const paymentMethods = document.querySelectorAll('.payment-method');
     paymentMethods.forEach(method => {
         method.addEventListener('click', handlePaymentMethodChange);
     });
     
-    // Event listeners para validación en tiempo real
+   
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
         input.addEventListener('blur', validateField);
@@ -51,9 +47,7 @@ function setupEventListeners() {
     });
 }
 
-/**
- * Carga los datos del carrito
- */
+
 async function loadCartData() {
     try {
         const response = await fetch('/api/cart/session', {
@@ -79,26 +73,20 @@ async function loadCartData() {
     }
 }
 
-/**
- * Carga datos del usuario si están disponibles
- */
+
 function loadUserData() {
-    // Los datos del usuario ya están disponibles desde el template
+    
 }
 
-/**
- * Configura la validación de formularios
- */
+
 function setupFormValidation() {
 }
 
-/**
- * Configura los métodos de pago
- */
+
 function setupPaymentMethods() {
     const cardForm = document.getElementById('card-form');
     
-    // Mostrar/ocultar formulario de tarjeta según el método seleccionado
+    
     function toggleCardForm() {
         const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked');
         if (selectedMethod) {
@@ -109,21 +97,19 @@ function setupPaymentMethods() {
         }
     }
     
-    // Ejecutar al cargar la página
+    
     toggleCardForm();
     
-    // Ejecutar cuando cambie el método de pago
+    
     const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
     paymentRadios.forEach(radio => {
         radio.addEventListener('change', toggleCardForm);
     });
 }
 
-/**
- * Configura el formateo de inputs
- */
+
 function setupInputFormatting() {
-    // Formatear número de tarjeta
+    
     const cardNumberInput = document.getElementById('cardNumber');
     if (cardNumberInput) {
         cardNumberInput.addEventListener('input', function(e) {
@@ -133,7 +119,7 @@ function setupInputFormatting() {
         });
     }
     
-    // Formatear fecha de vencimiento
+    
     const expiryInput = document.getElementById('expiryDate');
     if (expiryInput) {
         expiryInput.addEventListener('input', function(e) {
@@ -145,7 +131,7 @@ function setupInputFormatting() {
         });
     }
     
-    // Solo números en CVV
+    
     const cvvInput = document.getElementById('cvv');
     if (cvvInput) {
         cvvInput.addEventListener('input', function(e) {
@@ -153,7 +139,7 @@ function setupInputFormatting() {
         });
     }
     
-    // Solo números en teléfono
+    
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function(e) {
@@ -162,28 +148,24 @@ function setupInputFormatting() {
     }
 }
 
-/**
- * Maneja el cambio de método de pago
- */
+
 function handlePaymentMethodChange(e) {
-    // Remover clase active de todos los métodos
+    
     document.querySelectorAll('.payment-method').forEach(method => {
         method.classList.remove('active');
     });
     
-    // Agregar clase active al método seleccionado
+    
     e.currentTarget.classList.add('active');
     
-    // Marcar el radio button correspondiente
+    
     const radio = e.currentTarget.querySelector('input[type="radio"]');
     if (radio) {
         radio.checked = true;
     }
 }
 
-/**
- * Avanza al siguiente paso
- */
+
 function nextStep() {
     if (currentStep === 1) {
         if (validateShippingData()) {
@@ -197,25 +179,21 @@ function nextStep() {
     }
 }
 
-/**
- * Retrocede al paso anterior
- */
+
 function prevStep() {
     if (currentStep > 1) {
         goToStep(currentStep - 1);
     }
 }
 
-/**
- * Va a un paso específico
- */
+
 function goToStep(step) {
     currentStep = step;
     
-    // Actualizar indicadores de pasos
+    
     updateStepIndicators();
     
-    // Mostrar/ocultar secciones
+    
     document.querySelectorAll('.form-section').forEach(section => {
         section.classList.remove('active');
     });
@@ -225,13 +203,11 @@ function goToStep(step) {
         targetSection.classList.add('active');
     }
     
-    // Scroll al inicio de la sección
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/**
- * Obtiene el ID de la sección para un paso
- */
+
 function getSectionId(step) {
     switch (step) {
         case 1: return 'shipping-section';
@@ -241,9 +217,7 @@ function getSectionId(step) {
     }
 }
 
-/**
- * Actualiza los indicadores de pasos
- */
+
 function updateStepIndicators() {
     document.querySelectorAll('.step').forEach((step, index) => {
         step.classList.remove('active', 'completed');
@@ -256,9 +230,7 @@ function updateStepIndicators() {
     });
 }
 
-/**
- * Valida los datos de envío
- */
+
 function validateShippingData() {
     const fields = ['fullName', 'phone', 'address', 'city', 'postalCode'];
     let isValid = true;
@@ -271,7 +243,7 @@ function validateShippingData() {
     });
     
     if (isValid) {
-        // Guardar datos de envío
+        
         fields.forEach(field => {
             const input = document.getElementById(field);
             if (input) {
@@ -284,9 +256,7 @@ function validateShippingData() {
     return isValid;
 }
 
-/**
- * Valida los datos de pago
- */
+
 function validatePaymentData() {
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
     
@@ -297,7 +267,7 @@ function validatePaymentData() {
     
     formData.payment.method = paymentMethod.value;
     
-    // Si es tarjeta, validar datos adicionales
+    
     if (paymentMethod.value === 'credit_card' || paymentMethod.value === 'debit_card') {
         const cardFields = ['cardNumber', 'expiryDate', 'cvv', 'cardName'];
         let isValid = true;
@@ -324,9 +294,7 @@ function validatePaymentData() {
     return true;
 }
 
-/**
- * Valida un campo individual
- */
+
 function validateField(e) {
     const field = e.target;
     const value = field.value.trim();
@@ -334,10 +302,9 @@ function validateField(e) {
     let isValid = true;
     let errorMessage = '';
     
-    // Limpiar error anterior
+    
     clearError(e);
     
-    // Validaciones específicas por campo
     switch (fieldName) {
         case 'fullName':
             if (!value) {
@@ -402,7 +369,6 @@ function validateField(e) {
                 errorMessage = 'Formato inválido (MM/AA)';
                 isValid = false;
             } else {
-                // Validar que no esté vencida
                 const [month, year] = value.split('/').map(num => parseInt(num));
                 const currentDate = new Date();
                 const currentYear = currentDate.getFullYear() % 100;
@@ -440,9 +406,7 @@ function validateField(e) {
     return isValid;
 }
 
-/**
- * Muestra error en un campo específico
- */
+
 function showFieldError(fieldName, message) {
     const errorElement = document.getElementById(`${fieldName}-error`);
     if (errorElement) {
@@ -456,9 +420,7 @@ function showFieldError(fieldName, message) {
     }
 }
 
-/**
- * Limpia el error de un campo
- */
+
 function clearError(e) {
     const field = e.target;
     const fieldName = field.name || field.id;
@@ -471,11 +433,9 @@ function clearError(e) {
     field.classList.remove('error');
 }
 
-/**
- * Actualiza el resumen de confirmación
- */
+
 function updateConfirmationSummary() {
-    // Resumen de envío
+    
     const shippingSummary = document.getElementById('shipping-summary');
     if (shippingSummary) {
         shippingSummary.innerHTML = `
@@ -486,7 +446,6 @@ function updateConfirmationSummary() {
         `;
     }
     
-    // Resumen de pago
     const paymentSummary = document.getElementById('payment-summary');
     if (paymentSummary) {
         let paymentText = '';
@@ -512,9 +471,7 @@ function updateConfirmationSummary() {
     }
 }
 
-/**
- * Maneja el envío del formulario
- */
+
 async function handleFormSubmit(e) {
     e.preventDefault();
     
@@ -522,20 +479,18 @@ async function handleFormSubmit(e) {
         return;
     }
     
-    // Validar todos los datos una vez más
+    
     if (!validateShippingData() || !validatePaymentData()) {
         showError('Por favor revisa los datos ingresados');
         return;
     }
     
     try {
-        // Mostrar modal de procesamiento
+        
         showProcessingModal();
         
-        // Simular procesamiento de pago
         await simulatePaymentProcessing();
         
-        // Crear la orden
         const orderData = {
             shippingAddress: formData.shipping,
             paymentMethod: formData.payment.method,
@@ -560,7 +515,6 @@ async function handleFormSubmit(e) {
         
         hideProcessingModal();
         
-        // Mostrar modal de éxito
         showSuccessModal(result.order);
         
     } catch (error) {
@@ -569,9 +523,6 @@ async function handleFormSubmit(e) {
     }
 }
 
-/**
- * Simula el procesamiento de pago
- */
 async function simulatePaymentProcessing() {
     const messages = [
         'Validando información de pago...',
@@ -590,9 +541,6 @@ async function simulatePaymentProcessing() {
     }
 }
 
-/**
- * Muestra el modal de procesamiento
- */
 function showProcessingModal() {
     const modal = document.getElementById('processing-modal');
     if (modal) {
@@ -600,7 +548,6 @@ function showProcessingModal() {
         document.body.style.overflow = 'hidden';
     }
     
-    // Deshabilitar botón de confirmar
     const confirmBtn = document.getElementById('confirm-order');
     if (confirmBtn) {
         confirmBtn.disabled = true;
@@ -619,13 +566,9 @@ function hideProcessingModal() {
     }
 }
 
-/**
- * Muestra el modal de éxito
- */
 function showSuccessModal(order) {
     const modal = document.getElementById('success-modal');
     if (modal) {
-        // Llenar datos de la orden
         const orderNumberElement = document.getElementById('order-number');
         if (orderNumberElement) {
             orderNumberElement.textContent = order.orderNumber || order._id;
@@ -639,7 +582,7 @@ function showSuccessModal(order) {
         const deliveryDateElement = document.getElementById('delivery-date');
         if (deliveryDateElement) {
             const deliveryDate = new Date();
-            deliveryDate.setDate(deliveryDate.getDate() + 5); // 5 días hábiles
+            deliveryDate.setDate(deliveryDate.getDate() + 5);
             deliveryDateElement.textContent = deliveryDate.toLocaleDateString('es-AR');
         }
         
@@ -648,11 +591,7 @@ function showSuccessModal(order) {
     }
 }
 
-/**
- * Muestra un mensaje de error
- */
 function showError(message) {
-    // Crear o actualizar elemento de error global
     let errorElement = document.getElementById('global-error');
     if (!errorElement) {
         errorElement = document.createElement('div');
@@ -670,7 +609,6 @@ function showError(message) {
     `;
     errorElement.style.display = 'block';
     
-    // Auto-ocultar después de 5 segundos
     setTimeout(() => {
         if (errorElement) {
             errorElement.style.display = 'none';
@@ -678,9 +616,6 @@ function showError(message) {
     }, 5000);
 }
 
-/**
- * Cierra el mensaje de error global
- */
 function closeError() {
     const errorElement = document.getElementById('global-error');
     if (errorElement) {
@@ -688,7 +623,6 @@ function closeError() {
     }
 }
 
-// Funciones globales para los botones (accesibles desde HTML)
 window.nextStep = nextStep;
 window.prevStep = prevStep;
 window.closeError = closeError;

@@ -1,8 +1,4 @@
-/* ===========================================
-   ECOMMERCE CUSTOM STYLES
-   =========================================== */
 
-/* Variables de color */
 :root {
     --primary-color: #2c3e50;
     --secondary-color: #3498db;
@@ -15,7 +11,6 @@
     --border-color: #bdc3c7;
 }
 
-/* Reset y base */
 * {
     margin: 0;
     padding: 0;
@@ -29,14 +24,12 @@ body {
     line-height: 1.6;
 }
 
-/* Contenedor principal */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-/* Navbar */
 .navbar {
     background-color: var(--primary-color);
     padding: 1rem 0;
@@ -75,7 +68,6 @@ body {
     background-color: var(--secondary-color);
 }
 
-/* Contador del carrito */
 .cart-counter {
     background-color: var(--danger-color);
     color: var(--white);
@@ -85,7 +77,6 @@ body {
     margin-left: 5px;
 }
 
-/* Botones */
 .btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -134,7 +125,6 @@ body {
     background-color: #6c7b7d;
 }
 
-/* Cards */
 .card {
     background-color: var(--white);
     border-radius: 8px;
@@ -166,7 +156,6 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
-/* Grilla de productos */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -223,7 +212,6 @@ body {
     align-items: center;
 }
 
-/* Formularios */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -250,7 +238,6 @@ body {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-/* Alertas */
 .alert {
     padding: 1rem;
     border-radius: 4px;
@@ -275,7 +262,6 @@ body {
     border: 1px solid #b3d9ff;
 }
 
-/* Utilidades */
 .text-center {
     text-align: center;
 }
@@ -306,7 +292,6 @@ body {
     align-items: center;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .navbar .container {
         flex-direction: column;
@@ -325,10 +310,6 @@ body {
         flex-direction: column;
     }
 }
-
-/* ==============================================
-   PRODUCTOS Y CATÁLOGO AVANZADO
-============================================== */
 
 .container-header {
     display: flex;
@@ -376,7 +357,6 @@ body {
     animation: pulse 2s infinite;
 }
 
-/* Filtros */
 .filters-section {
     background: white;
     padding: 1.5rem;
@@ -385,7 +365,6 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
-/* Grid de productos mejorado */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -584,7 +563,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Estado vacío */
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
@@ -604,7 +582,6 @@ body {
     color: var(--text-dark);
 }
 
-/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -679,7 +656,6 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Notificaciones */
 .notification {
     position: fixed;
     top: 2rem;
@@ -709,7 +685,6 @@ body {
     border-left-color: var(--success-color);
 }
 
-/* Animaciones */
 @keyframes slideIn {
     from {
         transform: translateY(-50px);
@@ -822,7 +797,7 @@ body {
 }
 
 .item-details {
-    min-width: 0; /* Para permitir text-overflow */
+    min-width: 0;
 }
 
 .item-name {
@@ -1028,7 +1003,6 @@ body {
     color: white;
 }
 
-/* Estado vacío del carrito */
 .empty-cart {
     text-align: center;
     padding: 4rem 2rem;
@@ -1057,7 +1031,6 @@ body {
     line-height: 1.6;
 }
 
-/* Loading overlay */
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -1097,7 +1070,6 @@ body {
     font-weight: 600;
 }
 
-/* Responsive para carrito */
 @media (max-width: 768px) {
     .cart-item {
         grid-template-columns: 1fr;
@@ -1673,7 +1645,6 @@ body {
     font-size: 1.1rem;
 }
 
-/* Modales */
 .modal {
     display: none;
     position: fixed;
@@ -1854,7 +1825,6 @@ body {
     justify-content: center;
 }
 
-/* Responsive Design para Checkout */
 @media (max-width: 768px) {
     .checkout-content {
         grid-template-columns: 1fr;

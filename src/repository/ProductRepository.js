@@ -6,7 +6,6 @@ class ProductRepository {
         this.productDAO = productDAO;
     }
 
-    // Lógica de negocio: Obtener todos los productos
     async getAllProducts() {
         try {
             const products = await this.productDAO.getAll();
@@ -27,7 +26,6 @@ class ProductRepository {
         }
     }
 
-    // Lógica de negocio: Obtener producto por ID con validaciones
     async getProductById(productId) {
         try {
             if (!productId) {
@@ -123,7 +121,6 @@ class ProductRepository {
         }
     }
 
-    // Lógica de negocio: Actualizar producto
     async updateProduct(productId, updateData) {
         try {
             if (!productId) {
@@ -183,7 +180,6 @@ class ProductRepository {
         }
     }
 
-    // Lógica de negocio: Eliminar producto
     async deleteProduct(productId) {
         try {
             if (!productId) {
@@ -219,7 +215,6 @@ class ProductRepository {
         }
     }
 
-    // Lógica de negocio: Verificar disponibilidad de stock
     async checkStock(productId, requiredQuantity) {
         try {
             const product = await this.productDAO.getById(productId);
@@ -250,7 +245,6 @@ class ProductRepository {
         }
     }
 
-    // Lógica de negocio: Reducir stock después de compra
     async reduceStock(productId, quantity) {
         try {
             const product = await this.productDAO.getById(productId);

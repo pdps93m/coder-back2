@@ -4,11 +4,9 @@ import User from '../models/users.model.js';
 
 async function deleteAdmin() {
     try {
-        // Conectar a MongoDB
         await mongoose.connect(process.env.MONGODB_URL);
         console.log('Conectado a MongoDB');
 
-        // Buscar y eliminar usuario admin
         const result = await User.deleteOne({ role: 'admin' });
         
         if (result.deletedCount > 0) {
@@ -17,7 +15,6 @@ async function deleteAdmin() {
             console.log('No se encontró ningún usuario admin para eliminar');
         }
 
-        // Cerrar conexión
         await mongoose.connection.close();
         console.log('Conexión cerrada');
         
