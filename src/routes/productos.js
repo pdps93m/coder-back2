@@ -1,95 +1,96 @@
 import { Router } from "express";
-import productos from "../models/productos.model.js";
+import productDAO from "../dao/ProductDAO.js";
+import ProductDTO from "../dto/ProductDTO.js";
+import { requireAdmin, requireUserOrAdmin } from "../middlewares/auth.js";
+import passport from "passport";
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', passport.authenticate('jwt', { session: false }), requireUserOrAdmin, async (req, res) => {
     try {
-        const listaProductos = await productos.find()
-        res.status(200).json(listaProductos)
+        const listaProductos = await productDAO.getAll();
+        const productosDTO = listaProductos.map(producto => new ProductDTO(producto));
+        res.status(200).json(productosDTO);
     } catch (err) {
-        res.status(500).json({ error: "no pude acceder a los productos" })
+        res.status(500).json({ error: "no pude acceder a los productos" });
     }
-})
+});
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', passport.authenticate('jwt', { session: false }), requireUserOrAdmin, async (req, res) => {
     try {
-        const producto = await productos.findById(req.params.id)
+        const producto = await productDAO.getById(req.params.id);
         if (!producto) {
-            return res.status(404).json({ error: "Producto no encontrado" })
+            return res.status(404).json({ error: "Producto no encontrado" });
         }
-        res.status(200).json(producto)
+        res.status(200).json(new ProductDTO(producto));
     } catch (err) {
-        res.status(500).json({ error: "Fallo el acceso a la db de productos" })
+        res.status(500).json({ error: "Fallo el acceso a la db de productos" });
     }
-})
-
-router.post('/', async (req, res) => {
-    const { nombre, descripcion, precio, categoria, stock, codigo } = req.body
+});
+router.post('/', passport.authenticate('jwt', { session: false }), requireAdmin, async (req, res) => {
+    const { nombre, descripcion, precio, categoria, stock, codigo } = req.body;
 
     if (!nombre || !descripcion || !precio || !categoria || stock === undefined || !codigo) {
-        return res.status(400).json({ error: "Faltan datos obligatorios" })
+        return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
     try {
-        const nuevoProducto = new productos({ 
+        const nuevoProducto = await productDAO.create({ 
             nombre, 
             descripcion, 
             precio, 
             categoria, 
             stock, 
             codigo 
-        })
-        await nuevoProducto.save()
-        res.status(201).json(nuevoProducto)
+        });
+        res.status(201).json(new ProductDTO(nuevoProducto));
     } catch (err) {
         if (err.code === 11000) {
-            res.status(400).json({ error: "Código de producto ya existe" })
+            res.status(400).json({ error: "Código de producto ya existe" });
         } else {
-            res.status(500).json({ error: "Fallo el acceso a la db de productos" })
+            res.status(500).json({ error: "Fallo el acceso a la db de productos" });
         }
     }
-})
+});
 
-router.put('/:id', async (req, res) => {
-    const { nombre, descripcion, precio, categoria, stock, codigo } = req.body
+router.put('/:id', passport.authenticate('jwt', { session: false }), requireAdmin, async (req, res) => {
+    const { nombre, descripcion, precio, categoria, stock, codigo } = req.body;
 
     try {
-        const productoActualizado = await productos.findByIdAndUpdate(
+        const productoActualizado = await productDAO.update(
             req.params.id,
-            { nombre, descripcion, precio, categoria, stock, codigo },
-            { new: true, runValidators: true }
-        )
+            { nombre, descripcion, precio, categoria, stock, codigo }
+        );
 
         if (!productoActualizado) {
-            return res.status(404).json({ error: "Producto no encontrado" })
+            return res.status(404).json({ error: "Producto no encontrado" });
         }
 
-        res.status(200).json(productoActualizado)
+        res.status(200).json(new ProductDTO(productoActualizado));
     } catch (err) {
         if (err.code === 11000) {
-            res.status(400).json({ error: "Código de producto ya existe" })
+            res.status(400).json({ error: "Código de producto ya existe" });
         } else {
-            res.status(500).json({ error: "Fallo el acceso a la db de productos" })
+            res.status(500).json({ error: "Fallo el acceso a la db de productos" });
         }
     }
-})
+});
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', passport.authenticate('jwt', { session: false }), requireAdmin, async (req, res) => {
     try {
-        const productoEliminado = await productos.findByIdAndDelete(req.params.id)
+        const productoEliminado = await productDAO.delete(req.params.id);
 
         if (!productoEliminado) {
-            return res.status(404).json({ error: "Producto no encontrado" })
+            return res.status(404).json({ error: "Producto no encontrado" });
         }
 
         res.status(200).json({ 
             mensaje: "Producto eliminado correctamente", 
             producto: productoEliminado 
-        })
+        });
     } catch (err) {
-        res.status(500).json({ error: "Fallo el acceso a la db de productos" })
+        res.status(500).json({ error: "Fallo el acceso a la db de productos" });
     }
-})
+});
 
 export default router;

@@ -1,128 +1,113 @@
 import { Router } from 'express';
-import bcrypt from 'bcrypt';
-import User from '../models/users.model.js'
+import userRepository from '../repository/UserRepository.js';
 import passport from 'passport';
-import jwt from 'jsonwebtoken';
+import EmailService from '../services/EmailService.js';
 
-const createHash = password => bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-const isValidPassword = (user, password) => bcrypt.compareSync(password, user.password)
-
-const router = Router()
+const router = Router();
+const emailService = new EmailService();
 
 router.post('/register', async (req, res) => {
-    const { first_name, last_name, email, age, password } = req.body
-
-    if (!first_name || !email || !password) {
-        return res.status(400).json('completa todos los campos por favor')
-    }
-
     try {
-        const user = await User.findOne({email})
-        if (user) {
-            return res.status(400).json('el email ya está registrado')
+        const result = await userRepository.registerUser(req.body);
+        
+        if (!result.success) {
+            return res.status(result.statusCode).json({ error: result.message });
         }
 
-        const hashedPassword = createHash(password)
-
-        await User.create({
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
-            age: age,
-            password: hashedPassword
-        })
+        const { first_name, email } = req.body;
+        
+        try {
+            await emailService.transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Cuenta creada exitosamente',
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #333;">¡Hola ${first_name}!</h1>
+                    <p>Tu cuenta ha sido creada correctamente en nuestra plataforma.</p>
+                    <p>Ya puedes iniciar sesión cuando gustes.</p>
+                    <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px;">
+                        <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+                    </div>
+                </div>
+                `
+            });
+        } catch (emailError) {
+        }
         
         req.session.user = {
-            first_name: first_name,
-            email: email,
-            role: 'user'
-        }
+            _id: result.user._id,
+            first_name: result.user.first_name,
+            email: result.user.email,
+            role: result.user.role
+        };
 
-        res.redirect('/profile')
+        res.redirect('/profile');
     } catch (error) {
-        res.status(500).json({ error: 'ups, algo falló' })
+        res.status(500).json({ 
+            error: 'Error interno del servidor',
+            details: error.message 
+        });
     }
-})
+});
 
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body
+    try {
+        const { email, password } = req.body;
 
-    if (email && password) {
-        const user = await User.findOne({email})
-        if (user) {
-            if (isValidPassword(user, password)) {
-                req.session.user = {
-                    first_name: user.first_name,
-                    email: user.email,
-                    role: user.role
-                }
-                res.redirect('/profile')
-            } else {
-                return res.status(401).json('email o password incorrectos')
-            }
-        } else {
-            return res.status(401).json('usuario no encontrado')
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Se requiere email y password' });
         }
-    } else {
-        return res.status(400).json('necesito email y password')
+
+        const result = await userRepository.authenticateUser(email, password);
+        
+        if (!result.success) {
+            return res.status(result.statusCode).json({ error: result.message });
+        }
+
+        req.session.user = {
+            _id: result.user._id,
+            first_name: result.user.first_name,
+            email: result.user.email,
+            role: result.user.role
+        };
+
+        res.redirect('/profile');
+    } catch (error) {
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
-})
+});
 
 router.post('/login-jwt', async (req, res) => {
-    var { email, password } = req.body
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'faltan email o contraseña' })
-    }
-
     try {
-        const user = await User.findOne({email})
-        if (!user) {
-            return res.status(401).json({ error: 'credenciales invalidas' })
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Se requiere email y password' });
         }
 
-        if (!isValidPassword(user, password)) {
-            return res.status(401).json({ error: 'credenciales invalidas' })
+        const authResult = await userRepository.authenticateUser(email, password);
+        
+        if (!authResult.success) {
+            return res.status(authResult.statusCode).json({ error: authResult.message });
         }
 
-        const token = jwt.sign(
-            { 
-                id: user._id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                role: user.role
-            },
-            process.env.JWT_SECRET || 'secret_key',
-            { expiresIn: '1h' }
-        )
-
-        const refreshToken = jwt.sign(
-            { 
-                id: user._id,
-                email: user.email
-            },
-            process.env.JWT_REFRESH_SECRET || 'refresh_secret_key',
-            { expiresIn: '7d' }
-        )
+        const tokenResult = await userRepository.generateTokens(authResult.user);
+        
+        if (!tokenResult.success) {
+            return res.status(500).json({ error: tokenResult.message });
+        }
 
         res.json({
-            message: 'sesión iniciada correctamente',
-            token: token,
-            refreshToken: refreshToken,
-            user: {
-                id: user._id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                role: user.role
-            }
-        })
+            message: 'Sesión iniciada correctamente',
+            token: tokenResult.accessToken,
+            refreshToken: tokenResult.refreshToken,
+            user: authResult.userDTO
+        });
     } catch (error) {
-        console.log('Error en login-jwt:', error)
-        res.status(500).json({ error: 'Error interno del servidor' })
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
-})  
+});  
 
 async function registerMid(req,res,next) {
     const { first_name, last_name, email, age, password } = req.body
@@ -131,20 +116,22 @@ async function registerMid(req,res,next) {
     }
 
     try {
-        const user = await User.findOne({email})
+        const user = await userDAO.findByEmail(email);
         if (user) {
-            return res.status(400).json('el email ya está registrado')
+            return res.status(400).json('el email ya está registrado');
         }
 
-        const hashedPassword = createHash(password)
+        const hashedPassword = createHash(password);
+        const newCart = await cartDAO.createEmptyCart();
 
-        const newUser = await User.create({
+        const newUser = await userDAO.create({
             first_name: first_name,
             last_name: last_name,
             email: email,
             age: age,
-            password: hashedPassword
-        })
+            password: hashedPassword,
+            cart: newCart._id
+        });
         
         req.user = newUser
         next()
@@ -156,28 +143,26 @@ async function registerMid(req,res,next) {
 router.post('/register-api', registerMid, (req, res) => {
     res.status(201).json({ 
         message: 'Usuario registrado exitosamente',
-        user: {
-            id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
-            email: req.user.email,
-            role: req.user.role
-        }
+        user: new UserDTO(req.user)
     })
 })
 
-router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
-    res.json({
-        status: 'autenticado',
-        user: {
-            id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
-            email: req.user.email,
-            role: req.user.role
+router.get('/current', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const result = await userRepository.getUserProfile(req.user.id);
+        
+        if (!result.success) {
+            return res.status(result.statusCode).json({ error: result.message });
         }
-    })
-})
+
+        res.json({
+            status: 'autenticado',
+            user: result.user
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
 
 router.post('/refresh', (req, res) => {
     const { refreshToken } = req.body
@@ -187,7 +172,7 @@ router.post('/refresh', (req, res) => {
     }
     
     try {
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'refresh_secret_key')
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
         
         const token2 = jwt.sign(
             { 
@@ -195,7 +180,7 @@ router.post('/refresh', (req, res) => {
                 role: decoded.role,
                 id: decoded.id
             },
-            process.env.JWT_SECRET || 'secret_key',
+            process.env.JWT_SECRET,
             { expiresIn: '1h' }
         )
         
@@ -216,17 +201,15 @@ router.post('/forgot-password', async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ nombre })
+        const user = await userDAO.findByField('first_name', nombre);
         if (!user) {
-            return res.status(404).json({ error: 'Usuario no encontrado' })
+            return res.status(404).json({ error: 'Usuario no encontrado' });
         }
 
-        user.password = createHash(newPassword)
-        await user.save()
+        const updatedUser = await userDAO.updatePassword(user._id, createHash(newPassword));
 
         res.redirect('/')
     } catch (err) {
-        console.error('Error en forgot-password:', err)
         res.status(500).json({ error: 'Error interno del servidor' })
     }
 })
@@ -240,5 +223,31 @@ router.post('/logout', (req, res) => {
         res.redirect('/')
     })
 })
+
+router.post('/send-welcome-email', async (req, res) => {
+    const { email, name } = req.body;
+    
+    try {
+        await emailService.sendEmail(
+            email,
+            'Bienvenido a nuestra plataforma',
+            `¡Hola ${name}! Gracias por registrarte en nuestra plataforma.`,
+            `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #333;">¡Hola ${name}!</h1>
+                <p>Gracias por registrarte en nuestra plataforma.</p>
+                <p>Tu cuenta ha sido creada exitosamente.</p>
+                <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px;">
+                    <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+                </div>
+            </div>
+            `
+        );
+        
+        return res.status(200).json({ message: 'Email enviado correctamente' });
+    } catch (error) {
+        return res.status(500).json({ error: 'No se pudo enviar el email' });
+    }
+});
 
 export default router;

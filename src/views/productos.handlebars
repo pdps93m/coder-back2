@@ -1,29 +1,100 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Lista de Productos</h2>
-    <a href="/profile" class="btn btn-secondary">Volver al Perfil</a>
+<div class="container-header">
+    <h1 class="page-title">🛍️ Catálogo de Productos</h1>
+    <div class="header-actions">
+        <a href="/carrito" class="btn btn-cart">
+            🛒 Ver Carrito (<span id="cart-counter">0</span>)
+        </a>
+        <a href="/profile" class="btn btn-secondary">👤 Mi Perfil</a>
+    </div>
 </div>
 
-<div class="row">
+<!-- Filtros y ordenamiento -->
+<div class="filters-section">
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" id="search-filter" class="form-control" placeholder="Buscar productos...">
+        </div>
+        <div class="col-md-3">
+            <select id="category-filter" class="form-control">
+                <option value="">Todas las categorías</option>
+                {{#each categorias}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="sort-filter" class="form-control">
+                <option value="nombre">Ordenar por nombre</option>
+                <option value="precio-asc">Precio: menor a mayor</option>
+                <option value="precio-desc">Precio: mayor a menor</option>
+                <option value="stock">Por stock</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="products-grid" id="products-container">
     {{#if productos}}
         {{#each productos}}
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{nombre}}</h5>
-                    <p class="card-text"><strong>Precio:</strong> ${{precio}}</p>
-                    <p class="card-text"><strong>Descripción:</strong> {{descripcion}}</p>
-                    <p class="card-text"><strong>Categoría:</strong> {{categoria}}</p>
-                    <p class="card-text"><strong>Stock:</strong> {{stock}}</p>
-                    <small class="text-muted">Código: {{codigo}}</small>
+        <div class="product-card" data-product-id="{{_id}}" data-category="{{categoria}}" data-price="{{precio}}" data-name="{{nombre}}" data-stock="{{stock}}">
+            <div class="product-image">
+                <div class="product-badge">{{categoria}}</div>
+                <div class="stock-indicator {{#if (eq stock 0)}}out-of-stock{{else}}{{#if (lt stock 5)}}low-stock{{else}}in-stock{{/if}}{{/if}}">
+                    {{#if (eq stock 0)}}
+                        Sin stock
+                    {{else}}
+                        {{stock}} disponibles
+                    {{/if}}
+                </div>
+            </div>
+            
+            <div class="product-info">
+                <h3 class="product-title">{{nombre}}</h3>
+                <p class="product-description">{{descripcion}}</p>
+                <div class="product-price">${{precio}}</div>
+                <div class="product-code">Código: {{codigo}}</div>
+                
+                <div class="product-actions">
+                    {{#if (gt stock 0)}}
+                        <div class="quantity-selector">
+                            <button type="button" class="qty-btn" onclick="decreaseQuantity('{{_id}}')">-</button>
+                            <input type="number" id="qty-{{_id}}" class="qty-input" value="1" min="1" max="{{stock}}">
+                            <button type="button" class="qty-btn" onclick="increaseQuantity('{{_id}}', {{stock}})">+</button>
+                        </div>
+                        <button class="btn btn-add-cart" onclick="addToCart('{{_id}}', '{{nombre}}', {{precio}}, {{stock}})">
+                            🛒 Agregar al Carrito
+                        </button>
+                    {{else}}
+                        <button class="btn btn-disabled" disabled>
+                            ❌ Sin Stock
+                        </button>
+                    {{/if}}
                 </div>
             </div>
         </div>
         {{/each}}
     {{else}}
-        <div class="col-12">
-            <div class="alert alert-info" role="alert">
-                No hay productos disponibles en este momento.
-            </div>
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>No hay productos disponibles</h3>
+            <p>Vuelve pronto para ver nuestros productos.</p>
         </div>
     {{/if}}
+</div>
+
+<!-- Modal de confirmación -->
+<div id="add-cart-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✅ Producto Agregado</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="modal-message"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Continuar Comprando</button>
+            <a href="/carrito" class="btn btn-primary">Ver Carrito</a>
+        </div>
+    </div>
 </div>

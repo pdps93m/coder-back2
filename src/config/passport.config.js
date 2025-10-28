@@ -32,7 +32,7 @@ const initializePassport = () => {
 
     passport.use('jwt', new JWTStrategy({
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: process.env.JWT_SECRET || 'secret_key'
+        secretOrKey: process.env.JWT_SECRET
     }, async (jwt_payload, done) => {
         try {
             const user = await User.findById(jwt_payload.id);

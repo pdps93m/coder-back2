@@ -1,0 +1,339 @@
+<div class="checkout-container">
+    <!-- Header del Checkout -->
+    <div class="checkout-header">
+        <h1 class="checkout-title">💳 Finalizar Compra</h1>
+        <div class="checkout-steps">
+            <div class="step active">
+                <span class="step-number">1</span>
+                <span class="step-text">Datos de Envío</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span class="step-text">Pago</span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-text">Confirmación</span>
+            </div>
+        </div>
+    </div>
+
+    {{#if cart}}
+        {{#if cart.products}}
+            <div class="checkout-content">
+                <!-- Columna izquierda: Formularios -->
+                <div class="checkout-forms">
+                    <form id="checkout-form">
+                        <!-- Sección 1: Datos de Envío -->
+                        <div class="form-section active" id="shipping-section">
+                            <div class="section-header">
+                                <h2>📦 Datos de Envío</h2>
+                                <p>Ingresa la información para la entrega de tu pedido</p>
+                            </div>
+                            
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="fullName">Nombre Completo *</label>
+                                    <input type="text" id="fullName" name="fullName" required 
+                                           placeholder="Ej: María González" value="{{user.first_name}}">
+                                    <span class="form-error" id="fullName-error"></span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone">Teléfono *</label>
+                                    <input type="tel" id="phone" name="phone" required 
+                                           placeholder="Ej: +54 11 1234-5678">
+                                    <span class="form-error" id="phone-error"></span>
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label for="address">Dirección Completa *</label>
+                                    <input type="text" id="address" name="address" required 
+                                           placeholder="Ej: Av. Corrientes 1234, Piso 5, Depto B">
+                                    <span class="form-error" id="address-error"></span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="city">Ciudad *</label>
+                                    <input type="text" id="city" name="city" required 
+                                           placeholder="Ej: Buenos Aires">
+                                    <span class="form-error" id="city-error"></span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="postalCode">Código Postal *</label>
+                                    <input type="text" id="postalCode" name="postalCode" required 
+                                           placeholder="Ej: C1043AAR">
+                                    <span class="form-error" id="postalCode-error"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-next" onclick="nextStep()">
+                                    Continuar al Pago →
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sección 2: Método de Pago -->
+                        <div class="form-section" id="payment-section">
+                            <div class="section-header">
+                                <h2>💳 Método de Pago</h2>
+                                <p>Selecciona tu método de pago preferido (Simulación académica)</p>
+                            </div>
+                            
+                            <!-- Selector de método de pago -->
+                            <div class="payment-methods">
+                                <div class="payment-method active" data-method="credit_card">
+                                    <div class="payment-icon">💳</div>
+                                    <div class="payment-info">
+                                        <h3>Tarjeta de Crédito</h3>
+                                        <p>Visa, MasterCard, American Express</p>
+                                    </div>
+                                    <div class="payment-radio">
+                                        <input type="radio" name="paymentMethod" value="credit_card" checked>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-method" data-method="debit_card">
+                                    <div class="payment-icon">💳</div>
+                                    <div class="payment-info">
+                                        <h3>Tarjeta de Débito</h3>
+                                        <p>Débito inmediato desde tu cuenta</p>
+                                    </div>
+                                    <div class="payment-radio">
+                                        <input type="radio" name="paymentMethod" value="debit_card">
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-method" data-method="bank_transfer">
+                                    <div class="payment-icon">🏦</div>
+                                    <div class="payment-info">
+                                        <h3>Transferencia Bancaria</h3>
+                                        <p>Transferencia desde tu banco</p>
+                                    </div>
+                                    <div class="payment-radio">
+                                        <input type="radio" name="paymentMethod" value="bank_transfer">
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-method" data-method="cash_on_delivery">
+                                    <div class="payment-icon">💵</div>
+                                    <div class="payment-info">
+                                        <h3>Pago Contra Entrega</h3>
+                                        <p>Paga cuando recibas tu pedido</p>
+                                    </div>
+                                    <div class="payment-radio">
+                                        <input type="radio" name="paymentMethod" value="cash_on_delivery">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Formulario de tarjeta (solo visible para tarjetas) -->
+                            <div class="card-form" id="card-form">
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label for="cardNumber">Número de Tarjeta *</label>
+                                        <input type="text" id="cardNumber" name="cardNumber" 
+                                               placeholder="1234 5678 9012 3456" maxlength="19"
+                                               value="4111 1111 1111 1111">
+                                        <span class="form-error" id="cardNumber-error"></span>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="expiryDate">Fecha de Vencimiento *</label>
+                                        <input type="text" id="expiryDate" name="expiryDate" 
+                                               placeholder="MM/AA" maxlength="5" value="12/28">
+                                        <span class="form-error" id="expiryDate-error"></span>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cvv">CVV *</label>
+                                        <input type="text" id="cvv" name="cvv" 
+                                               placeholder="123" maxlength="4" value="123">
+                                        <span class="form-error" id="cvv-error"></span>
+                                    </div>
+                                    
+                                    <div class="form-group full-width">
+                                        <label for="cardName">Nombre en la Tarjeta *</label>
+                                        <input type="text" id="cardName" name="cardName" 
+                                               placeholder="Nombre como aparece en la tarjeta"
+                                               value="{{user.first_name}}">
+                                        <span class="form-error" id="cardName-error"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="academic-notice">
+                                <div class="notice-icon">ℹ️</div>
+                                <div class="notice-text">
+                                    <strong>Nota Académica:</strong> Esta es una simulación. No se realizarán cargos reales. 
+                                    Los datos de tarjeta son de prueba y no se almacenan.
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                    ← Volver a Datos
+                                </button>
+                                <button type="button" class="btn btn-next" onclick="nextStep()">
+                                    Revisar Pedido →
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sección 3: Confirmación -->
+                        <div class="form-section" id="confirmation-section">
+                            <div class="section-header">
+                                <h2>✅ Confirmación del Pedido</h2>
+                                <p>Revisa todos los datos antes de confirmar tu compra</p>
+                            </div>
+                            
+                            <!-- Resumen de datos -->
+                            <div class="confirmation-summary">
+                                <div class="summary-section">
+                                    <h3>📦 Datos de Envío</h3>
+                                    <div id="shipping-summary" class="summary-content"></div>
+                                </div>
+                                
+                                <div class="summary-section">
+                                    <h3>💳 Método de Pago</h3>
+                                    <div id="payment-summary" class="summary-content"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                    ← Volver a Pago
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-confirm" id="confirm-order">
+                                    <span class="btn-text">🛒 Confirmar Pedido</span>
+                                    <div class="btn-loader" style="display: none;">
+                                        <div class="spinner"></div>
+                                        Procesando...
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Columna derecha: Resumen del pedido -->
+                <div class="order-summary">
+                    <div class="summary-card">
+                        <h3>📋 Resumen del Pedido</h3>
+                        
+                        <div class="summary-products">
+                            {{#each cart.products}}
+                            <div class="summary-product">
+                                <div class="product-info">
+                                    <h4>{{product.nombre}}</h4>
+                                    <p>Cantidad: {{quantity}}</p>
+                                </div>
+                                <div class="product-price">
+                                    ${{multiply product.precio quantity}}
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        
+                        <div class="summary-totals">
+                            <div class="total-row">
+                                <span>Subtotal:</span>
+                                <span>${{cart.totalAmount}}</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Envío:</span>
+                                <span class="free-shipping">GRATIS</span>
+                            </div>
+                            <div class="total-row total-final">
+                                <span>Total:</span>
+                                <span>${{cart.totalAmount}}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-benefits">
+                            <div class="benefit">
+                                <span class="benefit-icon">🚚</span>
+                                <span>Envío gratis</span>
+                            </div>
+                            <div class="benefit">
+                                <span class="benefit-icon">🔒</span>
+                                <span>Compra segura</span>
+                            </div>
+                            <div class="benefit">
+                                <span class="benefit-icon">↩️</span>
+                                <span>Devolución fácil</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-actions">
+                            <a href="/carrito" class="btn btn-outline">
+                                ← Editar Carrito
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{else}}
+            <div class="empty-checkout">
+                <div class="empty-icon">🛒</div>
+                <h2>Tu carrito está vacío</h2>
+                <p>Agrega algunos productos antes de proceder al checkout.</p>
+                <a href="/productos" class="btn btn-primary">
+                    🛍️ Explorar Productos
+                </a>
+            </div>
+        {{/if}}
+    {{else}}
+        <div class="empty-checkout">
+            <div class="empty-icon">🛒</div>
+            <h2>Tu carrito está vacío</h2>
+            <p>Agrega algunos productos antes de proceder al checkout.</p>
+            <a href="/productos" class="btn btn-primary">
+                🛍️ Explorar Productos
+            </a>
+        </div>
+    {{/if}}
+</div>
+
+<!-- Modal de procesamiento -->
+<div id="processing-modal" class="modal">
+    <div class="modal-content processing-modal">
+        <div class="processing-header">
+            <h3>💳 Procesando tu pago...</h3>
+        </div>
+        <div class="processing-body">
+            <div class="processing-animation">
+                <div class="card-animation">💳</div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+            <p id="processing-message">Validando información de pago...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de éxito -->
+<div id="success-modal" class="modal">
+    <div class="modal-content success-modal">
+        <div class="success-header">
+            <div class="success-icon">✅</div>
+            <h3>¡Pedido Confirmado!</h3>
+        </div>
+        <div class="success-body">
+            <p>Tu pedido ha sido procesado exitosamente.</p>
+            <div class="order-details">
+                <p><strong>Número de orden:</strong> <span id="order-number"></span></p>
+                <p><strong>Total pagado:</strong> $<span id="order-total"></span></p>
+                <p><strong>Entrega estimada:</strong> <span id="delivery-date"></span></p>
+            </div>
+            <p>Recibirás un email de confirmación con los detalles de tu pedido.</p>
+        </div>
+        <div class="success-footer">
+            <a href="/productos" class="btn btn-secondary">Seguir Comprando</a>
+            <a href="/profile" class="btn btn-primary">Ver Mis Pedidos</a>
+        </div>
+    </div>
+</div>

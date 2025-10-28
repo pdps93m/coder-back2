@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret_key'
+const JWT_SECRET = process.env.JWT_SECRET
 
 export const generateToken = (user) => {
     return jwt.sign(
@@ -43,11 +43,11 @@ export const requireRole = (roles) => {
 
         if (Array.isArray(roles)) {
             if (!roles.includes(req.user.role)) {
-                return res.status(403).json({ error: 'no tienes permiso para esto' })
+                return res.status(403).json({ error: 'No tienes permiso para esto' })
             }
         } else {
             if (req.user.role !== roles) {
-                return res.status(403).json({ error: 'acceso denegado' })
+                return res.status(403).json({ error: 'Acceso denegado' })
             }
         }
 
